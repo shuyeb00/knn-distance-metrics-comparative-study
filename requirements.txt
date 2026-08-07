@@ -1,0 +1,8 @@
+numpy
+pandas
+scikit-learn
+scipy
+scikit-posthocs
+matplotlib
+seaborn
+tabulate
