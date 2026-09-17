@@ -139,9 +139,9 @@ All datasets are automatically downloaded via `scikit-learn` with zero manual co
 If you use this repository, the experimental methodology, or the benchmark results in your research, please cite:
 
 ```bibtex
-@article{numan2026impact,
+@article{suheb2026impact,
   title={Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study},
-  author={Numan, Shohid Ahmed and others},
+  author={Suheb Ahmed, Suheb et al.},
   journal={AIUB Journal of Science and Engineering (AJSE)},
   year={2026}
 }
