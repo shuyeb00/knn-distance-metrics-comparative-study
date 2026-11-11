@@ -1,0 +1,281 @@
+Metric,Seed,Class,F1 (%)
+euclidean,0,Ariel Sharon,25.806451612903224
+euclidean,0,Colin Powell,56.14035087719298
+euclidean,0,Donald Rumsfeld,40.909090909090914
+euclidean,0,George W Bush,72.17391304347827
+euclidean,0,Gerhard Schroeder,21.428571428571427
+euclidean,0,Hugo Chavez,38.095238095238095
+euclidean,0,Tony Blair,37.5
+euclidean,1,Ariel Sharon,41.17647058823529
+euclidean,1,Colin Powell,56.63716814159292
+euclidean,1,Donald Rumsfeld,51.28205128205128
+euclidean,1,George W Bush,74.47698744769873
+euclidean,1,Gerhard Schroeder,20.0
+euclidean,1,Hugo Chavez,11.76470588235294
+euclidean,1,Tony Blair,31.818181818181817
+euclidean,2,Ariel Sharon,31.25
+euclidean,2,Colin Powell,57.14285714285714
+euclidean,2,Donald Rumsfeld,37.735849056603776
+euclidean,2,George W Bush,70.58823529411765
+euclidean,2,Gerhard Schroeder,40.0
+euclidean,2,Hugo Chavez,23.52941176470588
+euclidean,2,Tony Blair,32.55813953488372
+euclidean,3,Ariel Sharon,18.181818181818183
+euclidean,3,Colin Powell,54.700854700854705
+euclidean,3,Donald Rumsfeld,48.78048780487805
+euclidean,3,George W Bush,70.88607594936708
+euclidean,3,Gerhard Schroeder,52.63157894736842
+euclidean,3,Hugo Chavez,11.76470588235294
+euclidean,3,Tony Blair,36.36363636363637
+euclidean,4,Ariel Sharon,50.0
+euclidean,4,Colin Powell,68.62745098039215
+euclidean,4,Donald Rumsfeld,36.36363636363637
+euclidean,4,George W Bush,75.50200803212851
+euclidean,4,Gerhard Schroeder,24.242424242424242
+euclidean,4,Hugo Chavez,0.0
+euclidean,4,Tony Blair,33.33333333333333
+euclidean,5,Ariel Sharon,50.0
+euclidean,5,Colin Powell,65.42056074766354
+euclidean,5,Donald Rumsfeld,53.333333333333336
+euclidean,5,George W Bush,73.55371900826447
+euclidean,5,Gerhard Schroeder,20.689655172413794
+euclidean,5,Hugo Chavez,33.33333333333333
+euclidean,5,Tony Blair,29.78723404255319
+euclidean,6,Ariel Sharon,51.42857142857142
+euclidean,6,Colin Powell,63.26530612244898
+euclidean,6,Donald Rumsfeld,39.02439024390244
+euclidean,6,George W Bush,72.19917012448133
+euclidean,6,Gerhard Schroeder,12.121212121212121
+euclidean,6,Hugo Chavez,47.61904761904761
+euclidean,6,Tony Blair,55.319148936170215
+euclidean,7,Ariel Sharon,33.33333333333333
+euclidean,7,Colin Powell,60.0
+euclidean,7,Donald Rumsfeld,51.28205128205128
+euclidean,7,George W Bush,75.40983606557377
+euclidean,7,Gerhard Schroeder,30.303030303030305
+euclidean,7,Hugo Chavez,30.0
+euclidean,7,Tony Blair,17.391304347826086
+euclidean,8,Ariel Sharon,46.15384615384615
+euclidean,8,Colin Powell,66.66666666666666
+euclidean,8,Donald Rumsfeld,50.0
+euclidean,8,George W Bush,73.50427350427351
+euclidean,8,Gerhard Schroeder,32.25806451612903
+euclidean,8,Hugo Chavez,23.52941176470588
+euclidean,8,Tony Blair,47.05882352941176
+euclidean,9,Ariel Sharon,41.37931034482759
+euclidean,9,Colin Powell,63.24786324786324
+euclidean,9,Donald Rumsfeld,51.28205128205128
+euclidean,9,George W Bush,73.19148936170212
+euclidean,9,Gerhard Schroeder,26.666666666666668
+euclidean,9,Hugo Chavez,44.44444444444444
+euclidean,9,Tony Blair,41.66666666666667
+manhattan,0,Ariel Sharon,37.03703703703704
+manhattan,0,Colin Powell,61.94690265486725
+manhattan,0,Donald Rumsfeld,54.54545454545454
+manhattan,0,George W Bush,74.8936170212766
+manhattan,0,Gerhard Schroeder,27.586206896551722
+manhattan,0,Hugo Chavez,38.095238095238095
+manhattan,0,Tony Blair,42.5531914893617
+manhattan,1,Ariel Sharon,38.70967741935484
+manhattan,1,Colin Powell,56.88073394495413
+manhattan,1,Donald Rumsfeld,46.51162790697674
+manhattan,1,George W Bush,75.30364372469636
+manhattan,1,Gerhard Schroeder,20.689655172413794
+manhattan,1,Hugo Chavez,23.52941176470588
+manhattan,1,Tony Blair,45.0
+manhattan,2,Ariel Sharon,34.48275862068966
+manhattan,2,Colin Powell,58.490566037735846
+manhattan,2,Donald Rumsfeld,55.81395348837209
+manhattan,2,George W Bush,75.51867219917013
+manhattan,2,Gerhard Schroeder,42.42424242424242
+manhattan,2,Hugo Chavez,31.57894736842105
+manhattan,2,Tony Blair,44.44444444444444
+manhattan,3,Ariel Sharon,18.181818181818183
+manhattan,3,Colin Powell,60.71428571428571
+manhattan,3,Donald Rumsfeld,61.53846153846154
+manhattan,3,George W Bush,74.3801652892562
+manhattan,3,Gerhard Schroeder,36.84210526315789
+manhattan,3,Hugo Chavez,12.5
+manhattan,3,Tony Blair,46.808510638297875
+manhattan,4,Ariel Sharon,38.70967741935484
+manhattan,4,Colin Powell,67.28971962616822
+manhattan,4,Donald Rumsfeld,60.46511627906976
+manhattan,4,George W Bush,77.04918032786885
+manhattan,4,Gerhard Schroeder,38.70967741935484
+manhattan,4,Hugo Chavez,13.333333333333334
+manhattan,4,Tony Blair,44.44444444444444
+manhattan,5,Ariel Sharon,33.33333333333333
+manhattan,5,Colin Powell,62.60869565217392
+manhattan,5,Donald Rumsfeld,60.46511627906976
+manhattan,5,George W Bush,75.40983606557377
+manhattan,5,Gerhard Schroeder,27.586206896551722
+manhattan,5,Hugo Chavez,22.22222222222222
+manhattan,5,Tony Blair,27.027027027027028
+manhattan,6,Ariel Sharon,41.17647058823529
+manhattan,6,Colin Powell,66.01941747572816
+manhattan,6,Donald Rumsfeld,43.90243902439025
+manhattan,6,George W Bush,73.38709677419355
+manhattan,6,Gerhard Schroeder,19.35483870967742
+manhattan,6,Hugo Chavez,33.33333333333333
+manhattan,6,Tony Blair,39.02439024390244
+manhattan,7,Ariel Sharon,42.857142857142854
+manhattan,7,Colin Powell,62.745098039215684
+manhattan,7,Donald Rumsfeld,53.06122448979592
+manhattan,7,George W Bush,74.4
+manhattan,7,Gerhard Schroeder,34.48275862068966
+manhattan,7,Hugo Chavez,31.57894736842105
+manhattan,7,Tony Blair,15.384615384615385
+manhattan,8,Ariel Sharon,48.275862068965516
+manhattan,8,Colin Powell,70.37037037037037
+manhattan,8,Donald Rumsfeld,65.0
+manhattan,8,George W Bush,78.04878048780488
+manhattan,8,Gerhard Schroeder,27.586206896551722
+manhattan,8,Hugo Chavez,33.33333333333333
+manhattan,8,Tony Blair,34.78260869565217
+manhattan,9,Ariel Sharon,32.0
+manhattan,9,Colin Powell,65.45454545454545
+manhattan,9,Donald Rumsfeld,55.00000000000001
+manhattan,9,George W Bush,79.66101694915254
+manhattan,9,Gerhard Schroeder,36.36363636363637
+manhattan,9,Hugo Chavez,33.33333333333333
+manhattan,9,Tony Blair,37.03703703703704
+chebyshev,0,Ariel Sharon,0.0
+chebyshev,0,Colin Powell,32.55813953488372
+chebyshev,0,Donald Rumsfeld,18.181818181818183
+chebyshev,0,George W Bush,55.319148936170215
+chebyshev,0,Gerhard Schroeder,7.4074074074074066
+chebyshev,0,Hugo Chavez,9.090909090909092
+chebyshev,0,Tony Blair,8.333333333333332
+chebyshev,1,Ariel Sharon,0.0
+chebyshev,1,Colin Powell,28.57142857142857
+chebyshev,1,Donald Rumsfeld,11.76470588235294
+chebyshev,1,George W Bush,55.81395348837209
+chebyshev,1,Gerhard Schroeder,0.0
+chebyshev,1,Hugo Chavez,9.090909090909092
+chebyshev,1,Tony Blair,8.16326530612245
+chebyshev,2,Ariel Sharon,10.81081081081081
+chebyshev,2,Colin Powell,29.411764705882355
+chebyshev,2,Donald Rumsfeld,5.263157894736842
+chebyshev,2,George W Bush,52.0
+chebyshev,2,Gerhard Schroeder,6.666666666666667
+chebyshev,2,Hugo Chavez,11.11111111111111
+chebyshev,2,Tony Blair,0.0
+chebyshev,3,Ariel Sharon,15.384615384615385
+chebyshev,3,Colin Powell,42.42424242424242
+chebyshev,3,Donald Rumsfeld,12.5
+chebyshev,3,George W Bush,62.96296296296296
+chebyshev,3,Gerhard Schroeder,22.22222222222222
+chebyshev,3,Hugo Chavez,20.0
+chebyshev,3,Tony Blair,9.523809523809524
+chebyshev,4,Ariel Sharon,7.142857142857142
+chebyshev,4,Colin Powell,32.69230769230769
+chebyshev,4,Donald Rumsfeld,12.903225806451612
+chebyshev,4,George W Bush,57.03422053231939
+chebyshev,4,Gerhard Schroeder,21.428571428571427
+chebyshev,4,Hugo Chavez,0.0
+chebyshev,4,Tony Blair,9.090909090909092
+chebyshev,5,Ariel Sharon,22.857142857142858
+chebyshev,5,Colin Powell,28.57142857142857
+chebyshev,5,Donald Rumsfeld,13.333333333333334
+chebyshev,5,George W Bush,53.11203319502075
+chebyshev,5,Gerhard Schroeder,7.142857142857142
+chebyshev,5,Hugo Chavez,0.0
+chebyshev,5,Tony Blair,0.0
+chebyshev,6,Ariel Sharon,16.0
+chebyshev,6,Colin Powell,34.146341463414636
+chebyshev,6,Donald Rumsfeld,0.0
+chebyshev,6,George W Bush,53.87755102040816
+chebyshev,6,Gerhard Schroeder,7.4074074074074066
+chebyshev,6,Hugo Chavez,0.0
+chebyshev,6,Tony Blair,12.244897959183673
+chebyshev,7,Ariel Sharon,21.428571428571427
+chebyshev,7,Colin Powell,33.33333333333333
+chebyshev,7,Donald Rumsfeld,0.0
+chebyshev,7,George W Bush,57.46268656716418
+chebyshev,7,Gerhard Schroeder,8.333333333333332
+chebyshev,7,Hugo Chavez,11.76470588235294
+chebyshev,7,Tony Blair,14.634146341463413
+chebyshev,8,Ariel Sharon,13.333333333333334
+chebyshev,8,Colin Powell,32.758620689655174
+chebyshev,8,Donald Rumsfeld,6.666666666666667
+chebyshev,8,George W Bush,55.96707818930041
+chebyshev,8,Gerhard Schroeder,0.0
+chebyshev,8,Hugo Chavez,0.0
+chebyshev,8,Tony Blair,14.814814814814813
+chebyshev,9,Ariel Sharon,16.0
+chebyshev,9,Colin Powell,37.03703703703704
+chebyshev,9,Donald Rumsfeld,0.0
+chebyshev,9,George W Bush,53.90625
+chebyshev,9,Gerhard Schroeder,12.903225806451612
+chebyshev,9,Hugo Chavez,8.695652173913043
+chebyshev,9,Tony Blair,9.30232558139535
+cosine,0,Ariel Sharon,32.0
+cosine,0,Colin Powell,47.61904761904761
+cosine,0,Donald Rumsfeld,39.130434782608695
+cosine,0,George W Bush,73.10924369747899
+cosine,0,Gerhard Schroeder,20.0
+cosine,0,Hugo Chavez,13.333333333333334
+cosine,0,Tony Blair,45.614035087719294
+cosine,1,Ariel Sharon,58.06451612903226
+cosine,1,Colin Powell,65.34653465346535
+cosine,1,Donald Rumsfeld,48.64864864864865
+cosine,1,George W Bush,75.80645161290323
+cosine,1,Gerhard Schroeder,25.0
+cosine,1,Hugo Chavez,0.0
+cosine,1,Tony Blair,46.15384615384615
+cosine,2,Ariel Sharon,37.03703703703704
+cosine,2,Colin Powell,68.04123711340206
+cosine,2,Donald Rumsfeld,53.57142857142857
+cosine,2,George W Bush,71.96652719665272
+cosine,2,Gerhard Schroeder,52.94117647058824
+cosine,2,Hugo Chavez,35.294117647058826
+cosine,2,Tony Blair,52.17391304347826
+cosine,3,Ariel Sharon,41.66666666666667
+cosine,3,Colin Powell,58.42696629213483
+cosine,3,Donald Rumsfeld,64.0
+cosine,3,George W Bush,74.9003984063745
+cosine,3,Gerhard Schroeder,42.42424242424242
+cosine,3,Hugo Chavez,12.5
+cosine,3,Tony Blair,49.056603773584904
+cosine,4,Ariel Sharon,66.66666666666666
+cosine,4,Colin Powell,71.11111111111111
+cosine,4,Donald Rumsfeld,57.77777777777777
+cosine,4,George W Bush,74.60317460317461
+cosine,4,Gerhard Schroeder,45.714285714285715
+cosine,4,Hugo Chavez,12.5
+cosine,4,Tony Blair,54.90196078431373
+cosine,5,Ariel Sharon,53.84615384615385
+cosine,5,Colin Powell,63.829787234042556
+cosine,5,Donald Rumsfeld,48.0
+cosine,5,George W Bush,75.40983606557377
+cosine,5,Gerhard Schroeder,34.285714285714285
+cosine,5,Hugo Chavez,35.294117647058826
+cosine,5,Tony Blair,40.0
+cosine,6,Ariel Sharon,56.25
+cosine,6,Colin Powell,62.22222222222222
+cosine,6,Donald Rumsfeld,48.888888888888886
+cosine,6,George W Bush,73.72549019607844
+cosine,6,Gerhard Schroeder,33.33333333333333
+cosine,6,Hugo Chavez,25.0
+cosine,6,Tony Blair,50.0
+cosine,7,Ariel Sharon,61.53846153846154
+cosine,7,Colin Powell,57.99999999999999
+cosine,7,Donald Rumsfeld,51.162790697674424
+cosine,7,George W Bush,73.01587301587301
+cosine,7,Gerhard Schroeder,36.36363636363637
+cosine,7,Hugo Chavez,35.294117647058826
+cosine,7,Tony Blair,22.22222222222222
+cosine,8,Ariel Sharon,58.06451612903226
+cosine,8,Colin Powell,71.57894736842105
+cosine,8,Donald Rumsfeld,65.3061224489796
+cosine,8,George W Bush,76.47058823529412
+cosine,8,Gerhard Schroeder,38.88888888888889
+cosine,8,Hugo Chavez,12.5
+cosine,8,Tony Blair,62.745098039215684
+cosine,9,Ariel Sharon,66.66666666666666
+cosine,9,Colin Powell,73.68421052631578
+cosine,9,Donald Rumsfeld,54.166666666666664
+cosine,9,George W Bush,74.16666666666667
+cosine,9,Gerhard Schroeder,48.64864864864865
+cosine,9,Hugo Chavez,35.294117647058826
+cosine,9,Tony Blair,40.816326530612244

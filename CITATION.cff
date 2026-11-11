@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this repository or its results, please cite the paper below."
+type: software
+title: "Code and results for: Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study"
+authors:
+  - family-names: Ahmed
+    given-names: "Md Suheb"
+    affiliation: "Metropolitan University, Sylhet, Bangladesh"
+repository-code: "https://github.com/shuyeb00/knn-distance-metrics-comparative-study"
+license: MIT
+date-released: "2026-11-12"
+preferred-citation:
+  type: article
+  title: "Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study"
+  authors:
+    - family-names: Ahmed
+      given-names: "Md Suheb"
+  year: 2026
+  notes: "Manuscript under peer review; preprint to be posted on arXiv."

@@ -1,0 +1,17 @@
+Dataset,Metric,Threads,Median Latency (ms)
+LFW People,euclidean,1,58.42679899978975
+LFW People,euclidean,2,58.93097900025168
+LFW People,manhattan,1,1313.30952099961
+LFW People,manhattan,2,732.2188349999124
+LFW People,chebyshev,1,733.545174000028
+LFW People,chebyshev,2,731.3945149999199
+LFW People,cosine,1,41.966148000028625
+LFW People,cosine,2,29.48364100029721
+Olivetti Faces,euclidean,1,15.179851000539202
+Olivetti Faces,euclidean,2,14.918668999598594
+Olivetti Faces,manhattan,1,157.22476700011612
+Olivetti Faces,manhattan,2,157.84515399991506
+Olivetti Faces,chebyshev,1,159.5379039999898
+Olivetti Faces,chebyshev,2,157.38930399948003
+Olivetti Faces,cosine,1,11.593429000640754
+Olivetti Faces,cosine,2,13.87702600004559

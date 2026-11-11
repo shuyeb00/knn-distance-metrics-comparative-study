@@ -1,0 +1,3 @@
+Dataset,"sklearn KNN predict, Euclidean (ms, 30-row test slice)","scipy cdist, Euclidean (ms, same slice)",Ratio (cdist / sklearn)
+LFW People,11.538708999978553,35.11028499997337,3.042826108192748
+Olivetti Faces,11.090185999819369,22.55760000025475,2.0340145783508192

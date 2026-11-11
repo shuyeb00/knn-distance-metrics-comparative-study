@@ -9,6 +9,8 @@ Reproducibility repository for the research study:
 
 This repository contains the complete experimental workflow, empirical benchmarks, statistical tests, and result datasets comparing classical distance metrics across low- to high-dimensional regimes.
 
+**Status:** the manuscript is under peer review; a preprint is being prepared for arXiv. The notebook and result files in this repository correspond to the final version of the manuscript (every table in the paper was checked against the CSV files in [`results/`](results/)).
+
 ---
 
 ## 📌 Overview & Key Research Contributions
@@ -16,12 +18,12 @@ This repository contains the complete experimental workflow, empirical benchmark
 While K-Nearest Neighbors (KNN) classification depends fundamentally on metric geometry, published rankings are often confounded by unexamined preprocessing choices and dimensional scaling. This study investigates whether metric rankings reflect intrinsic metric geometry or empirical artifacts across five benchmark datasets ($D = 4$ to $4,096$).
 
 ### Key Contributions & Findings:
-1. **Preprocessing Sensitivity:** Evaluates metrics across **Raw (unscaled)**, **Z-Score standardization**, and **Min-Max scaling**. The winning metric changes in **8 of 10** dataset–weighting pairs, proving that low-dimensional rankings are preprocessing-conditioned rather than universal.
+1. **Preprocessing Sensitivity:** Evaluates metrics across **Raw (unscaled)**, **Z-Score standardization**, and **Min-Max scaling**. The winning metric changes in **8 of 10** dataset–weighting pairs, so low-dimensional rankings are preprocessing-conditioned rather than universal; only Chebyshev's non-primacy (it never wins) holds across all three conditions.
 2. **Curse of Dimensionality & Class Collapse:** Highlights the structural failure of Chebyshev distance at high dimensions ($D \ge 1,850$). On the imbalanced LFW dataset, Chebyshev collapses toward the majority class (e.g., 52.5% of *Ariel Sharon* instances misclassified as *George W. Bush*), while Cosine achieves the smallest accuracy–macro-F1 gap.
-3. **High-Dimensional Remedy (PCA):** Demonstrates that training-fold PCA dramatically recovers Chebyshev on Olivetti Faces ($37.6\% \to 71.5\%$ uniform; $41.9\% \to 81.4\%$ distance-weighted) and elevates Manhattan beyond all unreduced KNN configurations.
-4. **Hardware & Latency Profiling:** Evaluates inference wall-clock latency under a randomized execution order across 400 configurations. Identifies an order-of-magnitude speedup for Euclidean and Cosine over Manhattan and Chebyshev at $D \ge 1,850$. A controlled implementation comparison demonstrates a genuine implementation-path factor ($2.0\times$–$3.0\times$), while thread-count sweeps contextualize BLAS behavior.
+3. **High-Dimensional Remedy (PCA):** Training-fold PCA strongly recovers Chebyshev on Olivetti Faces ($37.6\% \to 71.5\%$ uniform; $41.9\% \to 81.4\%$ distance-weighted) but helps it only modestly on LFW ($37.2\% \to 44.2\%$ uniform), and it lifts Manhattan above every unreduced KNN configuration on both face datasets.
+4. **Hardware & Latency Profiling:** Evaluates inference wall-clock latency under a randomized execution order across 400 configurations. Identifies an order-of-magnitude speedup for Euclidean and Cosine over Manhattan and Chebyshev at $D \ge 1,850$. A controlled implementation comparison shows a genuine but partial implementation-path factor ($2.0\times$–$3.0\times$); the 1-vs-2-thread sweep does **not** confirm the proposed BLAS-parallelization mechanism, so latency claims are scoped to the measured (shared, dual-core Colab) hardware.
 5. **Rigorous Statistical Testing:** Applies multi-seed Friedman omnibus tests and Nemenyi post-hoc analysis across both **uniform** and **distance-weighted** voting schemes.
-6. **Baseline Comparisons:** Benchmarks KNN against untuned Logistic Regression and RBF-kernel SVM classifiers.
+6. **Baseline Comparisons:** Benchmarks KNN against untuned Logistic Regression and RBF-kernel SVM classifiers. Logistic Regression exceeds KNN's best configuration by 18.88 pp on LFW and 6.50 pp on Olivetti, while KNN narrowly exceeds both baselines on Breast Cancer (descriptive gaps, not a claim of general superiority).
 
 ---
 
@@ -78,35 +80,40 @@ Spanning low-, moderate-, and high-dimensional regimes:
 ## 📁 Repository Structure
 
 ```text
-├── data/
-│   └── README.md                         # Dataset retrieval and caching instructions
 ├── notebooks/
-│   └── Impact_of_distance_matrics_on_KNN_classification_sourceCode.ipynb
-├── requirements.txt                      # Pinned Python package dependencies
+│   └── Impact_of_distance_metrics_on_KNN_classification_sourceCode.ipynb   # executed Colab notebook (all experiments)
+├── results/                              # CSV exports produced by the notebook (used for every table in the paper)
+├── figures/
+│   └── dimensional_stress_benchmarks.png # Fig. 1 of the paper
+├── data/
+│   └── README.md                         # Dataset retrieval notes (datasets are fetched via scikit-learn, not stored here)
+├── requirements.txt                      # Pinned package versions ("Environment B" in the paper)
+├── CITATION.cff                          # Citation metadata
 ├── LICENSE                               # MIT License
-└── README.md                             # Project documentation
+└── README.md
 ```
 
-### Generated Experimental Artifacts:
-Executing the notebook produces all empirical artifacts referenced in the paper:
-* `high_dim_computational_benchmarks.csv`: Master run log containing accuracy, F1, and Cohen's $\kappa$.
-* `preprocessing_sensitivity_results.csv`: Multi-seed evaluations across Raw, Z-Score, and Min-Max scaling.
-* `lfw_perclass_f1_results.csv`: Per-identity F1 scores and class-level diagnostic tables.
-* `pca_remedy_results.csv`: PCA dimensionality reduction evaluations (50, 100, and 95% variance).
-* `k_sensitivity_results.csv` & `k_sensitivity_diagnostic.csv`: Sensitivity sweeps across $K \in \{1, 3, 5, 7, 9, 15\}$.
-* `latency_remeasured_results.csv`: Latency profiles measured under randomized configuration orders.
-* `latency_uncertainty_comparison.csv`: Within-seed IQR vs. across-seed SD uncertainty metrics.
-* `blas_thread_sweep_results.csv`: Thread-limit scaling benchmarks (1 vs. 2 OpenBLAS/OpenMP threads).
-* `blas_control_condition_results.csv`: Implementation-path control (`scikit-learn` predict vs. `scipy.spatial.distance.cdist`).
-* `baseline_results.csv`: Logistic Regression and RBF-kernel SVM comparative baselines.
-* `dimensional_stress_benchmarks.png`: Accuracy distributions and log-scale latency scaling figures.
+### Where each paper table / result comes from
+
+| Paper element | File in `results/` (or notebook) |
+| :--- | :--- |
+| Table II (accuracy, macro-F1, Cohen's κ; Fig. 1 left) | `high_dim_computational_benchmarks.csv` |
+| Table III (winner by preprocessing: Raw / Z-Score / Min-Max) | `preprocessing_sensitivity_results.csv` |
+| Table IV (LFW per-class F1) | `lfw_perclass_f1_results.csv` |
+| Table V (Friedman), Nemenyi matrices, LFW confusion matrices | printed in the executed notebook's output cells (not exported as CSV) |
+| Table VI (K-sensitivity) | `k_sensitivity_diagnostic.csv`, `k_sensitivity_results.csv` |
+| Section IV-H (PCA remedy) | `pca_remedy_results.csv` |
+| Table VII (latency; Fig. 1 right) | `latency_remeasured_results.csv`, `latency_remeasured_per_seed.csv` |
+| Section V-C latency uncertainty (IQR vs. SD) | `latency_uncertainty_comparison.csv` |
+| Section IV-J (implementation-path control, thread sweep) | `blas_control_condition_results.csv`, `blas_thread_sweep_results.csv` |
+| Table VIII (Logistic Regression / RBF-SVM baselines) | `baseline_results.csv` |
 
 ---
 
 ## 🚀 Setup & Reproducibility
 
 ### Pinned Runtime Environment (Environment B)
-The experimental protocol was conducted on an x86_64 Linux environment (Intel Xeon CPU @ 2.20GHz, OpenBLAS/OpenMP threading backend):
+The experimental protocol was run on a shared x86_64 Linux Google Colab VM (dual-core Intel Xeon CPU @ 2.20GHz, 13.3 GB RAM, OpenBLAS/OpenMP with 2 threads):
 * **Python:** `3.13.15`
 * **scikit-learn:** `1.6.1`
 * **NumPy:** `2.1.3`
@@ -115,35 +122,32 @@ The experimental protocol was conducted on an x86_64 Linux environment (Intel Xe
 * **scikit-posthocs:** `0.17.0`
 * **threadpoolctl:** `3.6.0`
 
-### Installation
-Clone the repository and install dependencies:
+scikit-learn's version matters: `fetch_lfw_people` behavior is version-sensitive, and an earlier unpinned run gave different LFW numbers (see Section V-B of the paper). Keep scikit-learn at `1.6.1`.
 
+### Running on Google Colab (recommended)
+Upload `notebooks/Impact_of_distance_metrics_on_KNN_classification_sourceCode.ipynb` to [Google Colab](https://colab.research.google.com/) and run the cells in order. The notebook installs `scikit-posthocs` and `threadpoolctl` itself, and the public datasets are downloaded automatically through scikit-learn (network access is required for the initial LFW / Olivetti fetch).
+
+### Running locally
 ```bash
 git clone https://github.com/shuyeb00/knn-distance-metrics-comparative-study.git
 cd knn-distance-metrics-comparative-study
 pip install -r requirements.txt
+jupyter notebook notebooks/Impact_of_distance_metrics_on_KNN_classification_sourceCode.ipynb
 ```
-
-### Executing the Study
-Launch Jupyter Notebook or Google Colab and run the cells sequentially:
-
-```bash
-jupyter notebook notebooks/Impact_of_distance_matrics_on_KNN_classification_sourceCode.ipynb
-```
-All datasets are automatically downloaded via `scikit-learn` with zero manual configuration required.
+The notebook was written for Colab, so a few cells use Colab-only helpers (for example `from google.colab import files` and shell `!` commands). When running locally, skip or comment out those cells. Absolute latency numbers will differ from the paper on other hardware; accuracy-type results are expected to be reproducible with the pinned versions (see Section V-B of the paper).
 
 ---
 
 ## 📖 Citation
 
-If you use this repository, the experimental methodology, or the benchmark results in your research, please cite:
+If you use this repository, the experimental methodology, or the benchmark results in your research, please cite the paper (preprint details will be added here once available):
 
 ```bibtex
-@article{suheb2026impact,
-  title={Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study},
-  author={Suheb Ahmed, Suheb et al.},
-  journal={AIUB Journal of Science and Engineering (AJSE)},
-  year={2026}
+@misc{ahmed2026impact,
+  title  = {Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study},
+  author = {Ahmed, Md Suheb},
+  year   = {2026},
+  note   = {Manuscript under review. Code and results: https://github.com/shuyeb00/knn-distance-metrics-comparative-study}
 }
 ```
 
