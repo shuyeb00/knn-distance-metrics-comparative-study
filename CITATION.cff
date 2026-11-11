@@ -4,8 +4,28 @@ type: software
 title: "Code and results for: Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study"
 authors:
   - family-names: Ahmed
-    given-names: "Md Suheb"
-    affiliation: "Metropolitan University, Sylhet, Bangladesh"
+    given-names: "Suheb"
+    orcid: "https://orcid.org/0009-0008-8769-9825"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+  - family-names: Naeem
+    given-names: "Golam Mostofa"
+    orcid: "https://orcid.org/0009-0005-4393-0595"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+  - family-names: Tanjina
+    given-names: "Fahmida Yeasmin"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+  - family-names: Lina
+    given-names: "Fathima Akther"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+  - family-names: Sajib
+    given-names: "MD Ashraful Alam"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+  - family-names: Mollick
+    given-names: "Mou Rani"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+  - family-names: Saif
+    given-names: "Rijwan Hossain"
+    affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
 repository-code: "https://github.com/shuyeb00/knn-distance-metrics-comparative-study"
 license: MIT
 date-released: "2026-11-12"
@@ -14,6 +34,27 @@ preferred-citation:
   title: "Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study"
   authors:
     - family-names: Ahmed
-      given-names: "Md Suheb"
+      given-names: "Suheb"
+      orcid: "https://orcid.org/0009-0008-8769-9825"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+    - family-names: Naeem
+      given-names: "Golam Mostofa"
+      orcid: "https://orcid.org/0009-0005-4393-0595"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+    - family-names: Tanjina
+      given-names: "Fahmida Yeasmin"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+    - family-names: Lina
+      given-names: "Fathima Akther"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+    - family-names: Sajib
+      given-names: "MD Ashraful Alam"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+    - family-names: Mollick
+      given-names: "Mou Rani"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
+    - family-names: Saif
+      given-names: "Rijwan Hossain"
+      affiliation: "Department of Computer Science and Engineering, Metropolitan University, Sylhet, Bangladesh"
   year: 2026
   notes: "Manuscript under peer review; preprint to be posted on arXiv."

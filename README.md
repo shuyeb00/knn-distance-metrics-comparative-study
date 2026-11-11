@@ -145,7 +145,7 @@ If you use this repository, the experimental methodology, or the benchmark resul
 ```bibtex
 @misc{ahmed2026impact,
   title  = {Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study},
-  author = {Ahmed, Md Suheb},
+  author = {Ahmed, Suheb and Naeem, Golam Mostofa and Tanjina, Fahmida Yeasmin and Lina, Fathima Akther and Sajib, MD Ashraful Alam and Mollick, Mou Rani and Saif, Rijwan Hossain},
   year   = {2026},
   note   = {Manuscript under review. Code and results: https://github.com/shuyeb00/knn-distance-metrics-comparative-study}
 }
