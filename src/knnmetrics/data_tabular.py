@@ -72,3 +72,29 @@ def task_metadata(task_id):
         "exceeds_row_cap": n > MAX_ROWS,
         "dense_float64_mb": n * len(used) * 8 / 2**20,
     }
+
+
+def load_task(task_id):
+    task = openml.tasks.get_task(
+        task_id, download_splits=False, download_data=False,
+        download_qualities=False, download_features_meta_data=False,
+    )
+    ds = openml.datasets.get_dataset(
+        task.dataset_id, download_data=True,
+        download_qualities=False, download_features_meta_data=True,
+    )
+    X, y, _, names = ds.get_data(
+        target=task.target_name, include_row_id=False, include_ignore_attribute=False,
+    )
+    y = y.astype("category")
+    return X, y, task, ds
+
+
+def array_sha256(a):
+    import hashlib
+    import numpy as np
+    a = np.ascontiguousarray(a)
+    h = hashlib.sha256()
+    h.update(str(a.dtype).encode() + str(a.shape).encode())
+    h.update(a.tobytes())
+    return h.hexdigest()

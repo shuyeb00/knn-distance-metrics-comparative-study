@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from knnmetrics.data_tabular import CC18_SUITE_ID, MAX_ROWS, configure_openml_cache, suite_task_ids, task_metadata
+from knnmetrics.data_profile import profile_numeric_task
+from knnmetrics.data_tabular import CC18_SUITE_ID, MAX_ROWS, configure_openml_cache, load_task, suite_task_ids, task_metadata
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -44,16 +45,41 @@ def run_metadata(out_path):
     print(f"mixed-type tasks (secondary set): {len(df) - len(numeric)}")
 
 
+def run_profile(meta_path, out_path, task_ids=None):
+    meta = pd.read_csv(meta_path)
+    todo = meta.loc[meta["all_numeric"], "task_id"].tolist()
+    if task_ids:
+        todo = [t for t in todo if t in set(task_ids)]
+    done = set(pd.read_csv(out_path)["task_id"]) if out_path.exists() else set()
+    todo = [t for t in todo if t not in done]
+    print(f"{len(todo)} numeric tasks to profile ({len(done)} already in {out_path.name})")
+    for i, tid in enumerate(todo, 1):
+        t0 = time.perf_counter()
+        X, y, task, ds = load_task(tid)
+        row = {"task_id": tid, "name": ds.name}
+        row.update(profile_numeric_task(X, y))
+        del X, y
+        pd.DataFrame([row]).to_csv(out_path, mode="a", header=not out_path.exists(), index=False)
+        print(f"[{i:2d}/{len(todo)}] {tid:>6} {row['name'][:28]:<28} dup={row['n_duplicate_rows']:>6} "
+              f"conflict_rows={row['n_rows_in_conflicting_groups']:>5} const={row['n_constant_cols']:>3} "
+              f"order={row['label_order_ratio']:.2f} 1nn={row['one_nn_balanced_accuracy']:.3f} "
+              f"idlike=[{row['id_like_cols']}] ({time.perf_counter() - t0:.0f}s)")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build the OpenML-CC18 tabular benchmark.")
-    parser.add_argument("stage", choices=["metadata"])
+    parser.add_argument("stage", choices=["metadata", "profile"])
     parser.add_argument("--cache", default=str(REPO / "cache" / "openml"))
     parser.add_argument("--out", default=str(REPO / "results" / "benchmark" / "cc18_task_metadata.csv"))
+    parser.add_argument("--profile-out", default=str(REPO / "results" / "benchmark" / "cc18_numeric_data_profile.csv"))
+    parser.add_argument("--tasks", type=int, nargs="*")
     args = parser.parse_args()
 
     configure_openml_cache(args.cache)
     if args.stage == "metadata":
         run_metadata(Path(args.out).resolve())
+    elif args.stage == "profile":
+        run_profile(Path(args.out).resolve(), Path(args.profile_out).resolve(), args.tasks)
 
 
 if __name__ == "__main__":
