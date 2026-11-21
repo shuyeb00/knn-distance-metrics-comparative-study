@@ -98,3 +98,37 @@ def array_sha256(a):
     h.update(str(a.dtype).encode() + str(a.shape).encode())
     h.update(a.tobytes())
     return h.hexdigest()
+
+
+def prepare_task(task_id, cache_dir, max_rows=MAX_ROWS):
+    """Load, deduplicate and cap one task; cached as float64 arrays plus the kept source-row indices."""
+    import json
+    import numpy as np
+    from .evaluation import SEED, deduplicate, stratified_cap
+
+    cache_dir = Path(cache_dir)
+    path = cache_dir / f"task_{task_id}.npz"
+    if path.exists():
+        z = np.load(path, allow_pickle=False)
+        return z["X"], z["y"], json.loads(str(z["info"]))
+    X_df, y, task, ds = load_task(task_id)
+    X = X_df.to_numpy(dtype=np.float64)
+    codes = y.cat.codes.to_numpy().astype(np.int64)
+    info = {"task_id": int(task_id), "name": ds.name, "x_sha256_raw": array_sha256(X),
+            "y_sha256_raw": array_sha256(codes), "n_classes_total": int(len(y.cat.categories))}
+    keep, summary = deduplicate(X, codes)
+    info.update(summary)
+    cap = stratified_cap(codes[keep], max_rows, SEED)
+    rows = keep[cap]
+    info["n_rows_final"] = int(len(rows))
+    info["subsampled"] = bool(len(cap) < len(keep))
+    X, codes = X[rows], codes[rows]
+    present = np.unique(codes)
+    remap = np.full(codes.max() + 1, -1)
+    remap[present] = np.arange(len(present))
+    codes = remap[codes]
+    info["n_classes"] = int(len(present))
+    info["n_features"] = int(X.shape[1])
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    np.savez(path, X=X, y=codes, source_rows=rows, info=json.dumps(info))
+    return X, codes, info
