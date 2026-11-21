@@ -500,8 +500,8 @@ primary:
   n_features: 3072
   n_classes: 10
   subsampled: true
-  x_sha256: null
-  y_sha256: null
+  x_sha256: 49fdb66d1bc734f1767c7abe8f7a0cb6d86e61f2e979fb09a89f99a25a557165
+  y_sha256: fc0e8abf6b0fffed73a4fa99505fc87649f03088d9cb1711914f46e888a41d04
 secondary:
 - task_id: 3
   dataset_id: 3
