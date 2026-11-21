@@ -126,9 +126,9 @@ def build_model(name, device):
         return (lambda x: m(pixel_values=x).pooler_output), tf, f"{repo}, layer-normalised CLS token"
     if name == "clip_b32":
         import open_clip
-        m, _, preprocess = open_clip.create_model_and_transforms("ViT-B-32", pretrained="openai")
+        m, _, preprocess = open_clip.create_model_and_transforms("ViT-B-32-quickgelu", pretrained="openai")
         m = m.eval().to(device)
-        return m.encode_image, preprocess, "open_clip ViT-B-32 openai, image projection before L2 normalisation"
+        return m.encode_image, preprocess, "open_clip ViT-B-32-quickgelu openai, image projection before L2 normalisation"
     if name == "facenet":
         from facenet_pytorch import InceptionResnetV1
         m = InceptionResnetV1(pretrained="vggface2").eval().to(device)
