@@ -25,14 +25,26 @@ def _select(D, k, priority):
     kth = np.partition(D, k - 1, axis=1)[:, k - 1:k]
     less = D < kth
     equal = D == kth
-    need = k - less.sum(axis=1, keepdims=True)
-    take = less | (equal & (np.cumsum(equal, axis=1) <= need))
-    cols = np.argsort(~take, axis=1, kind="stable")[:, :k]
+    n_less = less.sum(axis=1)
+    n_equal = equal.sum(axis=1)
+    need = (k - n_less)[:, None]
+    over = n_equal > need[:, 0]
+    if over.any():
+        rows = np.flatnonzero(over)
+        sub = equal[rows]
+        sub &= np.cumsum(sub, axis=1, dtype=np.int32) <= need[rows]
+        equal_taken = equal.copy()
+        equal_taken[rows] = sub
+    else:
+        equal_taken = equal
+    less |= equal_taken
+    # Exactly k entries per row are set, so the row-major nonzero positions reshape to (m, k), ascending.
+    cols = np.nonzero(less)[1].reshape(D.shape[0], k)
     d = np.take_along_axis(D, cols, axis=1)
     order = np.lexsort((priority[cols], d), axis=1)
     cols = np.take_along_axis(cols, order, axis=1)
     d = np.take_along_axis(d, order, axis=1)
-    return d, cols, equal.sum(axis=1), less.sum(axis=1)
+    return d, cols, n_equal, n_less
 
 
 def kneighbors(X_train, X_query, k, metric, tie_break="index", seed=None, chunk_bytes=2**30, tie_ks=(),

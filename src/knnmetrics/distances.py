@@ -28,7 +28,10 @@ def snap(D, xp=np):
     tie rule, not floating-point noise, decides between them. The relative change is below 1e-12."""
     m, e = xp.frexp(D)
     if xp is np:
-        return np.ldexp(np.round(m * 2.0 ** SNAP_BITS), e - SNAP_BITS)
+        m *= 2.0 ** SNAP_BITS
+        np.round(m, out=m)
+        e -= SNAP_BITS
+        return np.ldexp(m, e, out=m)
     return xp.ldexp(xp.round(m * 2.0 ** SNAP_BITS), (e - SNAP_BITS).to(D.dtype))
 
 
@@ -51,10 +54,8 @@ def _pairwise_block(Q, T, metric):
         return cdist(Q, T, "euclidean")
     if metric == "linf":
         return cdist(Q, T, "chebyshev")
-    if metric == "l3":
-        return cdist(Q, T, "minkowski", p=3)
-    if metric == "l0.5":
-        return cdist(Q, T, "minkowski", p=0.5)
+    if metric in ("l3", "l0.5"):
+        return _fractional_or_cubic(Q, T, metric)
     if metric in ("cosine", "correlation"):
         if is_integer_valued(Q, T):
             return angular_block(Q, T, metric, np)
@@ -62,6 +63,29 @@ def _pairwise_block(Q, T, metric):
             D = cdist(Q, T, metric)
         return np.where(np.isnan(D), 1.0, D)
     raise ValueError(f"unknown metric {metric!r}")
+
+
+def _fractional_or_cubic(Q, T, metric, block_elems=2**19):
+    """L_3 and L_0.5 summed feature by feature in a fixed order, with |d|**3 as d*d*d and |d|**0.5 as sqrt.
+    This avoids a libm pow call per element (the dominant cost in SciPy's cdist) and, like cdist, gives
+    per-pair results that do not depend on chunking or thread count."""
+    m, n = Q.shape[0], T.shape[0]
+    out = np.empty((m, n))
+    rows = max(1, block_elems // max(n, 1))
+    for s in range(0, m, rows):
+        q = Q[s:s + rows]
+        acc = np.zeros((q.shape[0], n))
+        diff = np.empty_like(acc)
+        for j in range(Q.shape[1]):
+            np.subtract(q[:, j, None], T[None, :, j], out=diff)
+            np.abs(diff, out=diff)
+            if metric == "l0.5":
+                np.sqrt(diff, out=diff)
+            else:
+                np.multiply(diff, diff * diff, out=diff)
+            acc += diff
+        out[s:s + rows] = acc * acc if metric == "l0.5" else np.cbrt(acc)
+    return out
 
 
 def dyadic_scale(*arrays, max_shift=24):
