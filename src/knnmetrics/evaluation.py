@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import RepeatedStratifiedKFold, StratifiedKFold, train_test_split
@@ -76,7 +78,8 @@ def scores_from_predictions(y_true, y_pred, n_classes):
     }
 
 
-def evaluate_neighbours(res, y_train, y_test, n_classes, ks=K_GRID, weightings=TABULAR_WEIGHTINGS):
+def evaluate_neighbours(res, y_train, y_test, n_classes, ks=K_GRID, weightings=TABULAR_WEIGHTINGS,
+                        predictions=None):
     rows = []
     labels = y_train[res.indices]
     for K in ks:
@@ -85,6 +88,8 @@ def evaluate_neighbours(res, y_train, y_test, n_classes, ks=K_GRID, weightings=T
         ties = res.ties_at.get(K) if res.ties_at else None
         for w in weightings:
             pred, vote_tied = predict_from_neighbours(labels, res.distances, K, n_classes, w)
+            if predictions is not None:
+                predictions[(K, w)] = pred
             row = {"K": K, "weighting": w, **scores_from_predictions(y_test, pred, n_classes),
                    "vote_tie_rate": float(vote_tied.mean())}
             if ties is not None:
@@ -95,8 +100,11 @@ def evaluate_neighbours(res, y_train, y_test, n_classes, ks=K_GRID, weightings=T
 
 
 def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, preprocessings=TABULAR,
-                   inner=True, kmax=max(K_GRID), chunk_bytes=2**28, backend="numpy", device="cpu"):
-    """All grid cells for one outer fold: outer test scores and inner-CV validation scores."""
+                   inner=True, kmax=max(K_GRID), chunk_bytes=2**28, backend="numpy", device="cpu",
+                   weightings=TABULAR_WEIGHTINGS, predictions=None, timings=None):
+    """All grid cells for one outer fold: outer test scores and inner-CV validation scores.
+    If `predictions` is a dict it receives the outer-test predictions keyed by (preprocessing, metric, K, weighting);
+    `timings` receives the seconds spent per metric."""
     rows = []
     for prep in preprocessings:
         pp = FoldPreprocessor(prep, seed=SEED).fit(X[tr])
@@ -107,17 +115,23 @@ def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, prepr
                 ipp = FoldPreprocessor(prep, seed=SEED).fit(X[tr][itr])
                 inner_sets.append((itr, iva, ipp.transform(X[tr][itr]), ipp.transform(X[tr][iva])))
         for metric in metrics:
+            t0 = time.perf_counter()
             k = min(kmax, len(tr))
             res = kneighbors(Xtr, Xte, k, metric, tie_ks=tuple(K for K in K_GRID if K <= k),
                              chunk_bytes=chunk_bytes, backend=backend, device=device)
-            for r in evaluate_neighbours(res, y[tr], y[te], n_classes):
+            store = {} if predictions is not None else None
+            for r in evaluate_neighbours(res, y[tr], y[te], n_classes, weightings=weightings, predictions=store):
                 rows.append({"split": "outer_test", "inner_fold": -1, "preprocessing": prep, "metric": metric, **r})
+            if predictions is not None:
+                predictions.update({(prep, metric, K, w): p for (K, w), p in store.items()})
             for j, (itr, iva, Xi, Xv) in enumerate(inner_sets):
                 ki = min(kmax, len(itr))
                 ires = kneighbors(Xi, Xv, ki, metric, chunk_bytes=chunk_bytes, backend=backend, device=device)
-                for r in evaluate_neighbours(ires, y[tr][itr], y[tr][iva], n_classes):
+                for r in evaluate_neighbours(ires, y[tr][itr], y[tr][iva], n_classes, weightings=weightings):
                     rows.append({"split": "inner_validation", "inner_fold": j, "preprocessing": prep,
                                  "metric": metric, **r})
+            if timings is not None:
+                timings[metric] = timings.get(metric, 0.0) + time.perf_counter() - t0
     out = pd.DataFrame(rows)
     keys = ["split", "preprocessing", "metric", "K", "weighting"]
     inner_mean = (out[out["split"] == "inner_validation"].groupby(keys, sort=False)
