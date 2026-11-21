@@ -9,7 +9,7 @@ description = "When does the distance metric matter for k-nearest-neighbour clas
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 dependencies = [
     "numpy==2.4.6",
     "scipy==1.17.1",
