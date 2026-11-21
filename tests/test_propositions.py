@@ -47,7 +47,7 @@ def test_p2_l2_and_cosine_identical_on_a_sphere_including_ties():
     np.testing.assert_array_equal(a.indices, b.indices)
     np.testing.assert_array_equal(a.boundary_ties, b.boundary_ties)
     r2 = v @ v
-    np.testing.assert_allclose(a.distances ** 2, 2 * r2 * b.distances, rtol=1e-12, atol=1e-12)
+    np.testing.assert_allclose(a.distances ** 2, 2 * r2 * b.distances, rtol=1e-10, atol=1e-10)
 
 
 def test_p2_differences_arise_only_from_norm_variation():

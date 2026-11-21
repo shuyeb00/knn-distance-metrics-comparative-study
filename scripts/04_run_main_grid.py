@@ -24,7 +24,8 @@ def grid_config():
     from knnmetrics.preprocessing import TABULAR
     return {"metrics": list(METRICS), "preprocessings": list(TABULAR), "k_grid": list(K_GRID),
             "weightings": list(TABULAR_WEIGHTINGS), "outer": [N_REPEATS, N_SPLITS], "inner": N_INNER,
-            "seed": SEED, "tie_break": "index", "vote_tie": "lowest"}
+            "seed": SEED, "tie_break": "index", "vote_tie": "lowest",
+            "distance_rounding_bits": 40, "angular_exact_on_dyadic_data": True}
 
 
 def config_hash(cfg):
@@ -35,7 +36,15 @@ def unit_path(out_dir, task_id, repeat, fold, prep):
     return Path(out_dir) / f"task_{task_id}" / f"repeat{repeat}_fold{fold}_{prep}.parquet"
 
 
-def run_unit(task_id, repeat, fold, prep, prepared_dir, out_dir, chash, chunk_bytes):
+_DEVICE = {"name": "cpu"}
+
+
+def init_worker(device_queue):
+    if device_queue is not None:
+        _DEVICE["name"] = device_queue.get()
+
+
+def run_unit(task_id, repeat, fold, prep, prepared_dir, out_dir, chash, chunk_bytes, backend="numpy"):
     for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
         os.environ[var] = "1"
     import numpy as np
@@ -53,7 +62,9 @@ def run_unit(task_id, repeat, fold, prep, prepared_dir, out_dir, chash, chunk_by
     for r, f, tr, te in outer_splits(y):
         if (r, f) == (repeat, fold):
             break
-    df = run_outer_fold(X, y, n_classes, repeat, fold, tr, te, preprocessings=(prep,), chunk_bytes=chunk_bytes)
+    df = run_outer_fold(X, y, n_classes, repeat, fold, tr, te, preprocessings=(prep,), chunk_bytes=chunk_bytes,
+                        backend=backend, device=_DEVICE["name"])
+    df["backend"] = backend
     df.insert(0, "task_id", task_id)
     df["config_hash"] = chash
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -73,6 +84,10 @@ def main():
     p.add_argument("--out", default=str(REPO / "results" / "tabular" / "grid"))
     p.add_argument("--openml-cache", default=str(REPO / "cache" / "openml"))
     p.add_argument("--chunk-mb", type=int, default=256)
+    p.add_argument("--backend", choices=["numpy", "torch"], default="numpy")
+    p.add_argument("--devices", nargs="*", default=["cuda:0"], help="torch backend: one worker per device")
+    p.add_argument("--max-hours", type=float, default=None, help="stop starting new units after this many hours")
+    p.add_argument("--seed-from", nargs="*", default=[], help="directories with unit files from earlier sessions")
     p.add_argument("--prepare-only", action="store_true")
     args = p.parse_args()
 
@@ -91,7 +106,10 @@ def main():
     chash = config_hash(cfg)
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "grid_config.json").write_text(json.dumps({**cfg, "config_hash": chash}, indent=2) + "\n")
+    cfg_path = out_dir / "grid_config.json"
+    if cfg_path.exists() and json.loads(cfg_path.read_text())["config_hash"] != chash:
+        sys.exit(f"{out_dir} holds results from a different configuration; use a new --out or remove it")
+    cfg_path.write_text(json.dumps({**cfg, "config_hash": chash}, indent=2) + "\n")
 
     print(f"{len(tasks)} tasks, config {chash}, commit {git_commit()[:10]}", flush=True)
     summaries = []
@@ -116,17 +134,52 @@ def main():
              for pr in TABULAR]
     units.sort(key=lambda u: -cost[u[0]])
     todo = [u for u in units if not unit_path(out_dir, *u).exists()]
-    print(f"{len(units)} units, {len(todo)} to run on {args.jobs} processes", flush=True)
+    for src in args.seed_from:
+        import shutil
+        for f in Path(src).rglob("repeat*_fold*_*.parquet"):
+            dst = out_dir / f.parent.name / f.name
+            if f.parent.name.startswith("task_") and not dst.exists():
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, dst)
+    todo = [u for u in units if not unit_path(out_dir, *u).exists()]
+
+    import multiprocessing as mp
+    if args.backend == "torch":
+        ctx = mp.get_context("spawn")
+        queue = ctx.Queue()
+        for d in args.devices:
+            queue.put(d)
+        n_workers = len(args.devices)
+    else:
+        ctx, queue, n_workers = mp.get_context(), None, args.jobs
+    print(f"{len(units)} units, {len(todo)} to run on {n_workers} {args.backend} workers", flush=True)
     t0 = time.perf_counter()
-    done = 0
-    with ProcessPoolExecutor(max_workers=args.jobs) as ex:
-        futs = [ex.submit(run_unit, *u, args.prepared, str(out_dir), chash, args.chunk_mb * 2**20) for u in todo]
-        for fut in as_completed(futs):
+    deadline = t0 + args.max_hours * 3600 if args.max_hours else None
+    done, pending, it = 0, set(), iter(todo)
+    with ProcessPoolExecutor(max_workers=n_workers, mp_context=ctx, initializer=init_worker,
+                             initargs=(queue,)) as ex:
+        def submit_next():
+            if deadline and time.perf_counter() > deadline:
+                return False
+            u = next(it, None)
+            if u is None:
+                return False
+            pending.add(ex.submit(run_unit, *u, args.prepared, str(out_dir), chash,
+                                  args.chunk_mb * 2**20, args.backend))
+            return True
+        for _ in range(n_workers * 2):
+            submit_next()
+        while pending:
+            fut = next(as_completed(pending))
+            pending.discard(fut)
             tid, r, f, pr, sec, status = fut.result()
             done += 1
             el = time.perf_counter() - t0
             print(f"[{done}/{len(todo)}] task {tid} r{r} f{f} {pr} {status} {sec:.0f}s | elapsed {el / 60:.1f} min, "
                   f"eta {el / done * (len(todo) - done) / 60:.0f} min", flush=True)
+            submit_next()
+    left = sum(not unit_path(out_dir, *u).exists() for u in units)
+    print(f"finished: {len(units) - left} of {len(units)} units present, {left} left", flush=True)
 
 
 if __name__ == "__main__":

@@ -35,7 +35,8 @@ def _select(D, k, priority):
     return d, cols, equal.sum(axis=1), less.sum(axis=1)
 
 
-def kneighbors(X_train, X_query, k, metric, tie_break="index", seed=None, chunk_bytes=2**30, tie_ks=()):
+def kneighbors(X_train, X_query, k, metric, tie_break="index", seed=None, chunk_bytes=2**30, tie_ks=(),
+               backend="numpy", device="cpu"):
     """Exact k nearest training rows for every query row, sorted by (distance, tie priority).
 
     tie_break="index" keeps the lower training index on equal distances, so the neighbour list
@@ -52,6 +53,12 @@ def kneighbors(X_train, X_query, k, metric, tie_break="index", seed=None, chunk_
     if metric == "mahalanobis":
         mapping = MahalanobisMap().fit(X_train)
         X_train, X_query, metric = mapping.transform(X_train), mapping.transform(X_query), "l2"
+
+    if backend == "torch":
+        if tie_break != "index":
+            raise ValueError("the torch backend supports only the canonical tie rule")
+        from .torch_backend import kneighbors_torch
+        return kneighbors_torch(X_train, X_query, k, metric, device, chunk_bytes, tie_ks)
 
     if tie_break == "index":
         perm = np.arange(n)

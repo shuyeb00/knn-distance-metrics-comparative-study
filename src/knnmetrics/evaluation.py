@@ -95,7 +95,7 @@ def evaluate_neighbours(res, y_train, y_test, n_classes, ks=K_GRID, weightings=T
 
 
 def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, preprocessings=TABULAR,
-                   inner=True, kmax=max(K_GRID), chunk_bytes=2**28):
+                   inner=True, kmax=max(K_GRID), chunk_bytes=2**28, backend="numpy", device="cpu"):
     """All grid cells for one outer fold: outer test scores and inner-CV validation scores."""
     rows = []
     for prep in preprocessings:
@@ -109,12 +109,12 @@ def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, prepr
         for metric in metrics:
             k = min(kmax, len(tr))
             res = kneighbors(Xtr, Xte, k, metric, tie_ks=tuple(K for K in K_GRID if K <= k),
-                             chunk_bytes=chunk_bytes)
+                             chunk_bytes=chunk_bytes, backend=backend, device=device)
             for r in evaluate_neighbours(res, y[tr], y[te], n_classes):
                 rows.append({"split": "outer_test", "inner_fold": -1, "preprocessing": prep, "metric": metric, **r})
             for j, (itr, iva, Xi, Xv) in enumerate(inner_sets):
                 ki = min(kmax, len(itr))
-                ires = kneighbors(Xi, Xv, ki, metric, chunk_bytes=chunk_bytes)
+                ires = kneighbors(Xi, Xv, ki, metric, chunk_bytes=chunk_bytes, backend=backend, device=device)
                 for r in evaluate_neighbours(ires, y[tr][itr], y[tr][iva], n_classes):
                     rows.append({"split": "inner_validation", "inner_fold": j, "preprocessing": prep,
                                  "metric": metric, **r})
