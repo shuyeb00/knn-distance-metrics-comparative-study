@@ -9,7 +9,7 @@ Reproducibility repository for the research study:
 
 This repository contains the complete experimental workflow, empirical benchmarks, statistical tests, and result datasets comparing classical distance metrics across low- to high-dimensional regimes.
 
-**Status:** the manuscript is under peer review; a preprint is being prepared for arXiv. The notebook and result files in this repository correspond to the final version of the manuscript (every table in the paper was checked against the CSV files in [`results/`](results/)).
+**Status:** this is the v1 study (git tag `v1.0`). The notebook and result files correspond to the v1 manuscript, and every table in it was checked against the CSV files in [`results/`](results/). A substantially extended v2 study is in progress; its analysis plan is in [`docs/analysis_plan.md`](docs/analysis_plan.md).
 
 ---
 
@@ -147,7 +147,7 @@ If you use this repository, the experimental methodology, or the benchmark resul
   title  = {Impact of Distance Metrics on KNN Classification: A Preprocessing- and Dimensionality-Sensitive Comparative Study},
   author = {Ahmed, Suheb and Naeem, Golam Mostofa and Tanjina, Fahmida Yeasmin and Lina, Fathima Akther and Sajib, MD Ashraful Alam and Mollick, Mou Rani and Saif, Rijwan Hossain},
   year   = {2026},
-  note   = {Manuscript under review. Code and results: https://github.com/shuyeb00/knn-distance-metrics-comparative-study}
+  note   = {Code and results: https://github.com/shuyeb00/knn-distance-metrics-comparative-study}
 }
 ```
 
