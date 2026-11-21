@@ -2,7 +2,7 @@
 
 **Working title.** When does the distance metric matter for k-nearest-neighbour classification? Preprocessing, norm information, ties and hubness across tabular data and pretrained embeddings.
 
-**Status.** Draft. The plan is frozen with the git tag `analysis-plan-v2` before the main experimental grid is run. Any change after that tag is recorded in Section 12 with a date and a reason.
+**Status.** Frozen with the git tag `analysis-plan-v2` on 2026-11-21, before the main experimental grid was run. Any change after that tag is recorded in Section 12 with a date and a reason.
 
 ---
 
@@ -130,7 +130,7 @@ Neighbour search is exact brute force throughout, in float64 for every analysis 
 | I6 | Appending irrelevant Gaussian noise dimensions | P5, H5 |
 | I7 | Controlled class-imbalance resampling, crossed with I5 | P4, H4 |
 
-Each intervention is applied only to the representation, never to the labels. I1, I2 and I4 are applied to the representation that enters the metric, that is after preprocessing (I4 is also run with preprocessing "none" on raw pixels). I3 and I5 are applied to the raw data before preprocessing, as their hypotheses concern the interaction with preprocessing. Its strength is varied on a grid, and the predicted direction is stated before the run.
+Each intervention is applied only to the representation, never to the labels. I1, I2 and I4 are applied to the representation that enters the metric, that is after preprocessing (I4 is also run with preprocessing "none" on raw pixels). I3 and I5 are applied to the raw data before preprocessing, as their hypotheses concern the interaction with preprocessing. The strength of each intervention is varied on a grid, and the predicted direction is stated before the run.
 
 ---
 
@@ -183,7 +183,7 @@ All diagnostics are computed on training folds only:
   - an L1-regularized linear model;
   - a shallow random forest.
 
-  Training the selectors on synthetic datasets (Section 4.4) and testing them on the real ones is reported as an exploratory transfer check. Regret is the oracle score minus the score of the chosen cell. The comparators are fixed defaults (L2 with z-score; cosine with L2 normalization), inner-CV selection together with its compute cost, and random choice. Significance comes from a permutation test that shuffles the meta-targets.
+  Regret is the oracle score minus the score of the chosen cell. The comparators are fixed defaults (L2 with z-score; cosine with L2 normalization), inner-CV selection together with its compute cost, and random choice. Significance comes from a permutation test that shuffles the meta-targets across datasets. Training the selectors on synthetic datasets (Section 4.4) and testing them on the real ones is reported as an exploratory transfer check.
 
 ---
 
