@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler, QuantileTransformer, RobustScaler, StandardScaler
@@ -25,7 +27,9 @@ class FoldPreprocessor:
 
     def fit(self, X):
         X = np.asarray(X, dtype=np.float64)
-        self.medians_ = np.nanmedian(X, axis=0) if np.isnan(X).any() else None
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            self.medians_ = np.nanmedian(X, axis=0)
         Xi = self._impute(X)
         self.keep_ = np.ptp(Xi, axis=0) > 0
         Xk = Xi[:, self.keep_]
@@ -50,11 +54,8 @@ class FoldPreprocessor:
         return self
 
     def _impute(self, X):
-        if self.medians_ is None:
-            if np.isnan(X).any():
-                raise ValueError("missing values at transform time but none in the training fold")
-            return X
-        return np.where(np.isnan(X), self.medians_, X)
+        nan = np.isnan(X)
+        return np.where(nan, self.medians_, X) if nan.any() else X
 
     def transform(self, X):
         X = self._impute(np.asarray(X, dtype=np.float64))[:, self.keep_]

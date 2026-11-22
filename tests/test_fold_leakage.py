@@ -55,3 +55,13 @@ def test_mahalanobis_uses_training_rows_only():
     b = kneighbors(tr, q2, 7, "mahalanobis")
     np.testing.assert_array_equal(a.indices, b.indices[:30])
     np.testing.assert_allclose(a.distances, b.distances[:30], rtol=1e-12)
+
+
+def test_missing_values_only_at_transform_time_are_imputed_with_the_training_median():
+    import numpy as np
+    from knnmetrics.preprocessing import FoldPreprocessor
+    Xtr = np.array([[1.0, 5.0], [3.0, 5.0], [9.0, 7.0], [2.0, 8.0]])
+    Xte = np.array([[np.nan, 6.0], [4.0, np.nan]])
+    pp = FoldPreprocessor("none").fit(Xtr)
+    out = pp.transform(Xte)
+    np.testing.assert_allclose(out, [[2.5, 6.0], [4.0, 6.0]])

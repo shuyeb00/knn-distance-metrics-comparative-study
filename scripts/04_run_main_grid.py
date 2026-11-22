@@ -155,7 +155,7 @@ def main():
     print(f"{len(units)} units, {len(todo)} to run on {n_workers} {args.backend} workers", flush=True)
     t0 = time.perf_counter()
     deadline = t0 + args.max_hours * 3600 if args.max_hours else None
-    done, pending, it = 0, set(), iter(todo)
+    done, pending, it, owner, failed = 0, set(), iter(todo), {}, []
     with ProcessPoolExecutor(max_workers=n_workers, mp_context=ctx, initializer=init_worker,
                              initargs=(queue,)) as ex:
         def submit_next():
@@ -164,22 +164,34 @@ def main():
             u = next(it, None)
             if u is None:
                 return False
-            pending.add(ex.submit(run_unit, *u, args.prepared, str(out_dir), chash,
-                                  args.chunk_mb * 2**20, args.backend))
+            fut = ex.submit(run_unit, *u, args.prepared, str(out_dir), chash, args.chunk_mb * 2**20, args.backend)
+            owner[fut] = u
+            pending.add(fut)
             return True
         for _ in range(n_workers * 2):
             submit_next()
         while pending:
             fut = next(as_completed(pending))
             pending.discard(fut)
-            tid, r, f, pr, sec, status = fut.result()
             done += 1
             el = time.perf_counter() - t0
+            try:
+                tid, r, f, pr, sec, status = fut.result()
+            except Exception as e:
+                failed.append((owner[fut], f"{type(e).__name__}: {e}"))
+                print(f"[{done}/{len(todo)}] FAILED {owner[fut]} {type(e).__name__}: {e}", flush=True)
+                submit_next()
+                continue
             print(f"[{done}/{len(todo)}] task {tid} r{r} f{f} {pr} {status} {sec:.0f}s | elapsed {el / 60:.1f} min, "
                   f"eta {el / done * (len(todo) - done) / 60:.0f} min", flush=True)
             submit_next()
     left = sum(not unit_path(out_dir, *u).exists() for u in units)
     print(f"finished: {len(units) - left} of {len(units)} units present, {left} left", flush=True)
+    if failed:
+        print(f"{len(failed)} units failed:", flush=True)
+        for u, msg in failed:
+            print("  ", u, msg, flush=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -99,7 +99,7 @@ def main():
         ctx, queue, n_workers = mp.get_context(), None, args.jobs
     t0 = time.perf_counter()
     deadline = t0 + args.max_hours * 3600 if args.max_hours else None
-    done, pending, it = 0, set(), iter(todo)
+    done, pending, it, owner, failed = 0, set(), iter(todo), {}, []
     with ProcessPoolExecutor(max_workers=n_workers, mp_context=ctx, initializer=init_worker,
                              initargs=(queue,)) as ex:
         def submit_next():
@@ -108,16 +108,25 @@ def main():
             u = next(it, None)
             if u is None:
                 return False
-            pending.add(ex.submit(run_unit, u, str(out_dir), chash, args.chunk_mb * 2**20, args.backend))
+            fut = ex.submit(run_unit, u, str(out_dir), chash, args.chunk_mb * 2**20, args.backend)
+            owner[fut] = u
+            pending.add(fut)
             return True
         for _ in range(n_workers):
             submit_next()
         while pending:
             fut = next(as_completed(pending))
             pending.discard(fut)
-            u, sec, status, timings = fut.result()
             done += 1
             el = time.perf_counter() - t0
+            try:
+                u, sec, status, timings = fut.result()
+            except Exception as e:
+                failed.append((owner[fut], f"{type(e).__name__}: {e}"))
+                print(f"[{done}/{len(todo)}] FAILED {owner[fut]['dataset']} {owner[fut]['representation']} "
+                      f"{owner[fut]['preprocessing']} {type(e).__name__}: {e}", flush=True)
+                submit_next()
+                continue
             per_metric = " ".join(f"{m}={s:.0f}" for m, s in timings.items())
             print(f"[{done}/{len(todo)}] {u['dataset']} {u['representation']} {u['preprocessing']} "
                   f"r{u['repeat']}f{u['fold']} {status} {sec:.0f}s | {per_metric} | elapsed {el / 60:.1f} min",
@@ -125,6 +134,9 @@ def main():
             submit_next()
     left = sum(not unit_path(out_dir, u).exists() for u in units)
     print(f"finished: {len(units) - left} of {len(units)} units present, {left} left", flush=True)
+    if failed:
+        print(f"{len(failed)} units failed", flush=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
