@@ -186,10 +186,17 @@ def power_sums(Q32, T32, metric, kernel="auto", tile_elems=2 ** 24):
         S = torch.empty((m, n), dtype=torch.float32, device=Q32.device)
         t = TRITON_TILE
         grid = (triton.cdiv(m, t["BM"]), triton.cdiv(n, t["BN"]))
-        fn[grid](Q32, T32, S, m, n, Q32.shape[1], Q32.stride(0), Q32.stride(1), T32.stride(0), T32.stride(1),
-                 S.stride(0), S.stride(1), P=_KERNEL_CODE[metric], BM=t["BM"], BN=t["BN"], BK=t["BK"],
-                 num_warps=t["num_warps"])
-        return S
+        try:
+            fn[grid](Q32, T32, S, m, n, Q32.shape[1], Q32.stride(0), Q32.stride(1), T32.stride(0), T32.stride(1),
+                     S.stride(0), S.stride(1), P=_KERNEL_CODE[metric], BM=t["BM"], BN=t["BN"], BK=t["BK"],
+                     num_warps=t["num_warps"])
+            return S
+        except Exception as e:
+            if kernel == "triton":
+                raise
+            import warnings
+            warnings.warn(f"triton kernel failed ({type(e).__name__}: {e}); using the torch kernel from now on")
+            _TRITON["kernel"] = None
     if kernel == "triton":
         raise RuntimeError("triton is not available")
     S = torch.empty((m, n), dtype=torch.float32, device=Q32.device)
