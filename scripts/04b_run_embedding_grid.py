@@ -30,14 +30,15 @@ def run_unit(unit, out_dir, chash, chunk_bytes, backend):
     from knnmetrics.embedding_grid import compute_unit, unit_path, write_unit
     out = unit_path(out_dir, unit)
     if out.exists():
-        return unit, 0.0, "skipped", {}
+        return unit, 0.0, "skipped", {}, {}
     t0 = time.perf_counter()
-    df, predictions, timings = compute_unit(unit, chunk_bytes, backend, _DEVICE["name"])
+    stats = {} if backend == "torch_certified" else None
+    df, predictions, timings = compute_unit(unit, chunk_bytes, backend, _DEVICE["name"], search_stats=stats)
     protocol = "repeated_cv" if predictions is None else "official_split"
     write_unit(out, df, predictions, timings,
                {"dataset": unit["dataset"], "representation": unit["representation"], "protocol": protocol,
-                "backend": backend, "config_hash": chash})
-    return unit, time.perf_counter() - t0, "done", timings
+                "backend": backend, "config_hash": chash}, search_stats=stats)
+    return unit, time.perf_counter() - t0, "done", timings, stats or {}
 
 
 def main():
@@ -48,7 +49,7 @@ def main():
     p.add_argument("--datasets", nargs="*")
     p.add_argument("--representations", nargs="*")
     p.add_argument("--preprocessings", nargs="*")
-    p.add_argument("--backend", choices=["numpy", "torch"], default="numpy")
+    p.add_argument("--backend", choices=["numpy", "torch", "torch_certified"], default="numpy")
     p.add_argument("--devices", nargs="*", default=["cuda:0"], help="torch backend: one worker per device")
     p.add_argument("--jobs", type=int, default=2, help="numpy backend: worker processes")
     p.add_argument("--chunk-mb", type=int, default=512)
@@ -56,7 +57,7 @@ def main():
     p.add_argument("--estimate", action="store_true", help="list the units and exit")
     args = p.parse_args()
 
-    from knnmetrics.embedding_grid import build_index, find_roots, grid_config, make_units, unit_path
+    from knnmetrics.embedding_grid import build_index, fallback_share, find_roots, grid_config, make_units, unit_path
     from knnmetrics.preprocessing import EMBEDDING
 
     roots, clip_roots = find_roots(args.features), find_roots(args.clip_features)
@@ -89,7 +90,7 @@ def main():
         return
 
     import multiprocessing as mp
-    if args.backend == "torch":
+    if args.backend.startswith("torch"):
         ctx = mp.get_context("spawn")
         queue = ctx.Queue()
         for d in args.devices:
@@ -120,7 +121,7 @@ def main():
             done += 1
             el = time.perf_counter() - t0
             try:
-                u, sec, status, timings = fut.result()
+                u, sec, status, timings, stats = fut.result()
             except Exception as e:
                 failed.append((owner[fut], f"{type(e).__name__}: {e}"))
                 print(f"[{done}/{len(todo)}] FAILED {owner[fut]['dataset']} {owner[fut]['representation']} "
@@ -128,8 +129,9 @@ def main():
                 submit_next()
                 continue
             per_metric = " ".join(f"{m}={s:.0f}" for m, s in timings.items())
+            fb = f" | full fp64 {100 * fallback_share(stats):.2f}%" if stats else ""
             print(f"[{done}/{len(todo)}] {u['dataset']} {u['representation']} {u['preprocessing']} "
-                  f"r{u['repeat']}f{u['fold']} {status} {sec:.0f}s | {per_metric} | elapsed {el / 60:.1f} min",
+                  f"r{u['repeat']}f{u['fold']} {status} {sec:.0f}s | {per_metric}{fb} | elapsed {el / 60:.1f} min",
                   flush=True)
             submit_next()
     left = sum(not unit_path(out_dir, u).exists() for u in units)

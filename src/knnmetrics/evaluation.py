@@ -101,10 +101,11 @@ def evaluate_neighbours(res, y_train, y_test, n_classes, ks=K_GRID, weightings=T
 
 def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, preprocessings=TABULAR,
                    inner=True, kmax=max(K_GRID), chunk_bytes=2**28, backend="numpy", device="cpu",
-                   weightings=TABULAR_WEIGHTINGS, predictions=None, timings=None):
+                   weightings=TABULAR_WEIGHTINGS, predictions=None, timings=None, search_stats=None):
     """All grid cells for one outer fold: outer test scores and inner-CV validation scores.
     If `predictions` is a dict it receives the outer-test predictions keyed by (preprocessing, metric, K, weighting);
-    `timings` receives the seconds spent per metric."""
+    `timings` receives the seconds spent per metric and `search_stats` the per-metric stage counts of the
+    certified backend."""
     rows = []
     for prep in preprocessings:
         pp = FoldPreprocessor(prep, seed=SEED).fit(X[tr])
@@ -117,8 +118,9 @@ def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, prepr
         for metric in metrics:
             t0 = time.perf_counter()
             k = min(kmax, len(tr))
+            st = None if search_stats is None else search_stats.setdefault(metric, {})
             res = kneighbors(Xtr, Xte, k, metric, tie_ks=tuple(K for K in K_GRID if K <= k),
-                             chunk_bytes=chunk_bytes, backend=backend, device=device)
+                             chunk_bytes=chunk_bytes, backend=backend, device=device, stats=st)
             store = {} if predictions is not None else None
             for r in evaluate_neighbours(res, y[tr], y[te], n_classes, weightings=weightings, predictions=store):
                 rows.append({"split": "outer_test", "inner_fold": -1, "preprocessing": prep, "metric": metric, **r})
@@ -126,7 +128,8 @@ def run_outer_fold(X, y, n_classes, repeat, fold, tr, te, metrics=METRICS, prepr
                 predictions.update({(prep, metric, K, w): p for (K, w), p in store.items()})
             for j, (itr, iva, Xi, Xv) in enumerate(inner_sets):
                 ki = min(kmax, len(itr))
-                ires = kneighbors(Xi, Xv, ki, metric, chunk_bytes=chunk_bytes, backend=backend, device=device)
+                ires = kneighbors(Xi, Xv, ki, metric, chunk_bytes=chunk_bytes, backend=backend, device=device,
+                                  stats=st)
                 for r in evaluate_neighbours(ires, y[tr][itr], y[tr][iva], n_classes, weightings=weightings):
                     rows.append({"split": "inner_validation", "inner_fold": j, "preprocessing": prep,
                                  "metric": metric, **r})

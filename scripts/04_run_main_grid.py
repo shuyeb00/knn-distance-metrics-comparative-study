@@ -84,7 +84,7 @@ def main():
     p.add_argument("--out", default=str(REPO / "results" / "tabular" / "grid"))
     p.add_argument("--openml-cache", default=str(REPO / "cache" / "openml"))
     p.add_argument("--chunk-mb", type=int, default=256)
-    p.add_argument("--backend", choices=["numpy", "torch"], default="numpy")
+    p.add_argument("--backend", choices=["numpy", "torch", "torch_certified"], default="numpy")
     p.add_argument("--devices", nargs="*", default=["cuda:0"], help="torch backend: one worker per device")
     p.add_argument("--max-hours", type=float, default=None, help="stop starting new units after this many hours")
     p.add_argument("--seed-from", nargs="*", default=[], help="directories with unit files from earlier sessions")
@@ -144,7 +144,7 @@ def main():
     todo = [u for u in units if not unit_path(out_dir, *u).exists()]
 
     import multiprocessing as mp
-    if args.backend == "torch":
+    if args.backend.startswith("torch"):
         ctx = mp.get_context("spawn")
         queue = ctx.Queue()
         for d in args.devices:

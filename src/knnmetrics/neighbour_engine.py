@@ -48,13 +48,15 @@ def _select(D, k, priority):
 
 
 def kneighbors(X_train, X_query, k, metric, tie_break="index", seed=None, chunk_bytes=2**30, tie_ks=(),
-               backend="numpy", device="cpu"):
+               backend="numpy", device="cpu", stats=None):
     """Exact k nearest training rows for every query row, sorted by (distance, tie priority).
 
     tie_break="index" keeps the lower training index on equal distances, so the neighbour list
     for any K <= k is the prefix of this list. tie_break="random" uses a seeded permutation of
     the training rows as the priority instead. tie_ks lists further K values at which the number of
-    training rows tied with the K-th distance is counted (stored in ties_at).
+    training rows tied with the K-th distance is counted (stored in ties_at). backend="torch_certified"
+    returns the same result as backend="torch" through a float32 candidate pass (certified_search);
+    `stats` then receives how many queries were settled at each stage.
     """
     X_train = np.asarray(X_train, dtype=np.float64)
     X_query = np.asarray(X_query, dtype=np.float64)
@@ -66,9 +68,12 @@ def kneighbors(X_train, X_query, k, metric, tie_break="index", seed=None, chunk_
         mapping = MahalanobisMap().fit(X_train)
         X_train, X_query, metric = mapping.transform(X_train), mapping.transform(X_query), "l2"
 
-    if backend == "torch":
+    if backend in ("torch", "torch_certified"):
         if tie_break != "index":
-            raise ValueError("the torch backend supports only the canonical tie rule")
+            raise ValueError("the torch backends support only the canonical tie rule")
+        if backend == "torch_certified":
+            from .certified_search import kneighbors_certified
+            return kneighbors_certified(X_train, X_query, k, metric, device, chunk_bytes, tie_ks, stats=stats)
         from .torch_backend import kneighbors_torch
         return kneighbors_torch(X_train, X_query, k, metric, device, chunk_bytes, tie_ks)
 

@@ -134,8 +134,9 @@ def _load(unit):
     return np.concatenate([Xtr, Xte]), np.concatenate([ytr, yte]), len(ytr)
 
 
-def compute_unit(unit, chunk_bytes, backend="numpy", device="cpu", inner=True):
-    """Returns the score table, the outer-test predictions (official splits only) and per-metric seconds."""
+def compute_unit(unit, chunk_bytes, backend="numpy", device="cpu", inner=True, search_stats=None):
+    """Returns the score table, the outer-test predictions (official splits only) and per-metric seconds.
+    With the certified backend, `search_stats` receives per-metric counts of queries settled at each stage."""
     prep = unit["preprocessing"]
     timings, store = {}, {}
     if unit["dataset"] in FACES:
@@ -147,7 +148,7 @@ def compute_unit(unit, chunk_bytes, backend="numpy", device="cpu", inner=True):
                 break
         df = run_outer_fold(X, y, n_classes, r, f, tr, te, preprocessings=(prep,), chunk_bytes=chunk_bytes,
                             backend=backend, device=device, weightings=EMBEDDING_WEIGHTINGS, timings=timings,
-                            inner=inner)
+                            inner=inner, search_stats=search_stats)
         return df, None, timings
     X, y, ntr = _load(unit)
     X = X.astype(np.float64)
@@ -155,7 +156,7 @@ def compute_unit(unit, chunk_bytes, backend="numpy", device="cpu", inner=True):
     tr, te = np.arange(ntr), np.arange(ntr, len(y))
     df = run_outer_fold(X, y, n_classes, 0, 0, tr, te, preprocessings=(prep,), chunk_bytes=chunk_bytes,
                         backend=backend, device=device, weightings=EMBEDDING_WEIGHTINGS, predictions=store,
-                        timings=timings, inner=inner)
+                        timings=timings, inner=inner, search_stats=search_stats)
     dtype = np.uint8 if n_classes <= 256 else np.uint16
     pred = np.zeros((len(METRICS), len(K_GRID), len(EMBEDDING_WEIGHTINGS), len(te)), dtype=dtype)
     for (_, metric, K, w), p in store.items():
@@ -163,7 +164,7 @@ def compute_unit(unit, chunk_bytes, backend="numpy", device="cpu", inner=True):
     return df, {"pred": pred, "y_test": y[te].astype(dtype)}, timings
 
 
-def write_unit(out_path, df, predictions, timings, extra):
+def write_unit(out_path, df, predictions, timings, extra, search_stats=None):
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     stem = out_path.with_suffix("")
@@ -176,9 +177,18 @@ def write_unit(out_path, df, predictions, timings, extra):
         df[k] = v
     Path(str(stem) + "_timing.json").write_text(json.dumps({k: round(v, 1) for k, v in timings.items()}) + "\n",
                                                   encoding="utf-8")
+    search_stats = {k: v for k, v in (search_stats or {}).items() if v}
+    if search_stats:
+        Path(str(stem) + "_search.json").write_text(json.dumps(search_stats, sort_keys=True) + "\n", encoding="utf-8")
     tmp = out_path.with_suffix(".tmp")
     df.to_parquet(tmp, index=False)
     tmp.replace(out_path)
+
+
+def fallback_share(search_stats):
+    """Share of queries that needed a full float64 search, over all metrics of a unit."""
+    q = sum(v.get("queries", 0) for v in search_stats.values())
+    return sum(v.get("full_float64", 0) for v in search_stats.values()) / q if q else 0.0
 
 
 def merge_scores(out_dir):
